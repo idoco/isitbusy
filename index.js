@@ -31,10 +31,9 @@ app.post('/hook', (req, res) => {
             sendTelegramMessage(chatId,
                 '*Is it busy?*\n' +
                 'Share a busy wolt restaurant page with me\n' +
-                'and I\'ll message you when it comes back online',
-                "Markdown");
+                'and I\'ll message you when it comes back online');
         } else if (text) {
-            // do the thing
+            console.log(`incoming message ${text}`)
         }
 
     } catch (e) {
@@ -44,13 +43,13 @@ app.post('/hook', (req, res) => {
     res.end();
 });
 
-const sendTelegramMessage = async (chat_id, text, parse_mode) => {
+const sendTelegramMessage = async (chat_id, text) => {
     got.post('https://api.telegram.org/bot' + process.env.TELEGRAM_TOKEN + '/sendMessage',
         {
             form: {
                 chat_id,
                 text,
-                parse_mode
+                parse_mode: "Markdown"
             }
         });
 }
