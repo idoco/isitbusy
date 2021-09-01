@@ -1,23 +1,21 @@
-// const request = require('request');
 const express = require('express');
 const http = require('http');
+const got = require('got');
 
 const app = express();
 const server = http.createServer(app);
 app.use(express.json());
-// app.use(express.static('dist', {index: 'demo.html', maxage: '4h'}));
 
 const port = process.env.PORT || process.argv[2] || 3000;
 
 app.get('/test', (_, res) => {
     res.statusCode = 200;
-    res.end(
-        `cool yes`);
+    res.end('yes, this is dog');
 });
 
 app.post('/test', (req, res) => {
     res.statusCode = 200;
-    res.json({message: `echo: ${req.body.message}`});
+    res.json({ message: `echo: ${req.body.message}` });
 });
 
 app.post('/hook', (req, res) => {
@@ -35,8 +33,8 @@ app.post('/hook', (req, res) => {
                 'Share a busy wolt restaurant page with me\n' +
                 'and I\'ll message you when it comes back online',
                 "Markdown");
-        } else if (text){
-            io.emit(chatId, {name, text, from: 'admin'});
+        } else if (text) {
+            // do the thing
         }
 
     } catch (e) {
@@ -46,14 +44,15 @@ app.post('/hook', (req, res) => {
     res.end();
 });
 
-function sendTelegramMessage(chatId, text, parseMode) {
-    // request
-    //     .post('https://api.telegram.org/bot' + process.env.TELEGRAM_TOKEN + '/sendMessage')
-    //     .form({
-    //         "chat_id": chatId,
-    //         "text": text,
-    //         "parse_mode": parseMode
-    //     });
+const sendTelegramMessage = async (chat_id, text, parse_mode) => {
+    got.post('https://api.telegram.org/bot' + process.env.TELEGRAM_TOKEN + '/sendMessage',
+        {
+            form: {
+                chat_id,
+                text,
+                parse_mode
+            }
+        });
 }
 
 server.listen(port, () => console.log(`Proxy dashboard listening on port ${port}!`));
