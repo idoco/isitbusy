@@ -54,6 +54,7 @@ app.post('/hook', async (req, res) => {
 
 const checkRestaurantStatus = async (slug) => {
     const res = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`);
+    console.log(JSON.stringify(res.body));
     return res.body.results[0].online;
 }
 
