@@ -8,6 +8,8 @@ app.use(express.json());
 
 const port = process.env.PORT || process.argv[2] || 3000;
 
+const jobs = {};
+
 app.get('/test', (_, res) => {
     res.statusCode = 200;
     res.end('yes, this is dog');
@@ -45,6 +47,8 @@ app.post('/hook', async (req, res) => {
                     sendTelegramMessage(chatId, `Oh, I see that it is currently offline. I'll ping you when it comes back online 🙃`);
                 }
 
+                jobs[chatId] = slug;
+
             } catch (e) {
                 console.error("message error", e);
                 sendTelegramMessage(chatId, 'nope');
@@ -75,4 +79,24 @@ const sendTelegramMessage = async (chat_id, text) => {
         });
 }
 
+const theLoop = async () => {
+    console.log('do the loop');
+
+    const chatIds = Object.keys(jobs);
+    for (const chatId of chatIds) {
+        const slug = jobs[chatId];
+        console.log(`checking chatId ${chatId} for slug ${slug}`);
+        const status = await checkRestaurantStatus(slug);
+
+        if (status) {
+            sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
+            delete jobs[chatId];
+        } else {
+            sendTelegramMessage(chatId, `Still offline 😔`);
+        }
+    }
+}
+
 server.listen(port, () => console.log(`Proxy dashboard listening on port ${port}!`));
+
+setInterval(theLoop, 5000);
