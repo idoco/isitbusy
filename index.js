@@ -18,7 +18,7 @@ app.post('/test', (req, res) => {
     res.json({ message: `echo: ${req.body.message}` });
 });
 
-app.post('/hook', (req, res) => {
+app.post('/hook', async (req, res) => {
     try {
         const message = req.body.message || req.body.channel_post;
         const chatId = message.chat.id;
@@ -34,6 +34,16 @@ app.post('/hook', (req, res) => {
                 'and I\'ll message you when it comes back online');
         } else if (text) {
             console.log(`incoming message ${text}`)
+            try {
+                const url = new URL(text);
+                const slug = url.pathname.split('/').pop();
+                console.log(`slug ${slug}`)
+                const status = await checkRestaurantStatus(slug);
+                console.log(`status ${status}`)
+                sendTelegramMessage(chatId,`current status is ${status}`);
+            } catch (e) {
+                sendTelegramMessage(chatId,'nope');
+            }
         }
 
     } catch (e) {
@@ -43,8 +53,13 @@ app.post('/hook', (req, res) => {
     res.end();
 });
 
+const checkRestaurantStatus = async (slug) => {
+    const res = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`);
+    return res.body.results[0].online;
+}
+
 const sendTelegramMessage = async (chat_id, text) => {
-    got.post('https://api.telegram.org/bot' + process.env.TELEGRAM_TOKEN + '/sendMessage',
+    got.post(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`,
         {
             form: {
                 chat_id,
