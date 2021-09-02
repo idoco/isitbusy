@@ -52,9 +52,8 @@ app.post('/hook', async (req, res) => {
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
                 } else {
                     sendTelegramMessage(chatId, `Oh, I see that it is currently offline. I'll ping you when it comes back online 🙃`);
+                    jobs[chatId] = slug;
                 }
-
-                jobs[chatId] = slug;
 
             } catch (e) {
                 console.error("message error", e);
