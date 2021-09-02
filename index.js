@@ -41,7 +41,7 @@ app.post('/hook', async (req, res) => {
             sendTelegramMessage(chatId, `Stopping. Home cooked meals are the best 😏`);
 
         } else if (text) {
-            console.log(`incoming message ${text}`)
+            console.log(`incoming message ${text} from ${chatId}`)
             try {
                 const url = new URL(text.trim());
                 const slug = url.pathname.split('/').pop();
