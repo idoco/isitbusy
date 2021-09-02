@@ -38,10 +38,10 @@ app.post('/hook', async (req, res) => {
                 console.log(`slug ${slug}`)
                 const status = await checkRestaurantStatus(slug);
                 console.log(`status ${status}`)
-                sendTelegramMessage(chatId,`current status is ${status}`);
+                sendTelegramMessage(chatId, `current status is ${status}`);
             } catch (e) {
                 console.error("message error", e);
-                sendTelegramMessage(chatId,'nope');
+                sendTelegramMessage(chatId, 'nope');
             }
         }
 
@@ -53,9 +53,9 @@ app.post('/hook', async (req, res) => {
 });
 
 const checkRestaurantStatus = async (slug) => {
-    const res = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`);
-    console.log(JSON.stringify(res.body));
-    return res.body.results[0].online;
+    const res = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`)
+        .json();
+    return res.results[0].online;
 }
 
 const sendTelegramMessage = async (chat_id, text) => {
