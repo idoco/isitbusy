@@ -99,4 +99,4 @@ const theLoop = async () => {
 
 server.listen(port, () => console.log(`Proxy dashboard listening on port ${port}!`));
 
-setInterval(theLoop, 5000);
+setInterval(theLoop, 60000);
