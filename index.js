@@ -22,9 +22,7 @@ app.post('/hook', async (req, res) => {
     try {
         const message = req.body.message || req.body.channel_post;
         const chatId = message.chat.id;
-        const name = message.chat.first_name || message.chat.title || "admin";
-        const text = message.text || "";
-        const reply = message.reply_to_message;
+        const text = message.text || "empty";
 
         if (text.startsWith("/start")) {
             console.log("/start chatId " + chatId);
@@ -35,13 +33,14 @@ app.post('/hook', async (req, res) => {
         } else if (text) {
             console.log(`incoming message ${text}`)
             try {
-                const url = new URL(text);
+                const url = new URL(text.trim());
                 const slug = url.pathname.split('/').pop();
                 console.log(`slug ${slug}`)
                 const status = await checkRestaurantStatus(slug);
                 console.log(`status ${status}`)
                 sendTelegramMessage(chatId,`current status is ${status}`);
             } catch (e) {
+                console.error("message error", e);
                 sendTelegramMessage(chatId,'nope');
             }
         }
