@@ -8,6 +8,7 @@ app.use(express.json());
 
 const port = process.env.PORT || process.argv[2] || 3000;
 
+// todo: move to redis
 const jobs = {};
 
 app.get('/test', (_, res) => {
@@ -27,12 +28,18 @@ app.post('/hook', async (req, res) => {
         const text = message.text || "empty";
 
         if (text.startsWith("/start")) {
-            console.log("/start chatId " + chatId);
+            console.log(`/start chatId ${chatId}`);
             sendTelegramMessage(chatId,
                 '*Is it busy?*\n' +
                 'Share a busy wolt restaurant page with me\n' +
                 'and I\'ll message you when it comes back online\n' +
                 '🌯 🍔 😋 🍕 🥡');
+
+        } else if (text.startsWith("/stop")) {
+            console.log(`/stop chatId ${chatId}`);
+            delete jobs[chatId];
+            sendTelegramMessage(chatId, `Stopping. Home cooked meals are the best 😏`);
+
         } else if (text) {
             console.log(`incoming message ${text}`)
             try {
