@@ -29,16 +29,22 @@ app.post('/hook', async (req, res) => {
             sendTelegramMessage(chatId,
                 '*Is it busy?*\n' +
                 'Share a busy wolt restaurant page with me\n' +
-                'and I\'ll message you when it comes back online');
+                'and I\'ll message you when it comes back online\n' +
+                '🌯 🍔 😋 🍕 🥡');
         } else if (text) {
             console.log(`incoming message ${text}`)
             try {
                 const url = new URL(text.trim());
                 const slug = url.pathname.split('/').pop();
-                console.log(`slug ${slug}`)
                 const status = await checkRestaurantStatus(slug);
                 console.log(`status ${status}`)
-                sendTelegramMessage(chatId, `current status is ${status}`);
+
+                if (status) {
+                    sendTelegramMessage(chatId, `You're in luck. It is currently taking orders 🚴‍♂️`);
+                } else {
+                    sendTelegramMessage(chatId, `Oh, I see that it is currently unavailable. I'll ping you when it comes back online 🙃`);
+                }
+
             } catch (e) {
                 console.error("message error", e);
                 sendTelegramMessage(chatId, 'nope');
