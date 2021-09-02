@@ -31,7 +31,7 @@ app.post('/hook', async (req, res) => {
             console.log(`/start chatId ${chatId}`);
             sendTelegramMessage(chatId,
                 '*Is it busy?*\n' +
-                'Share a busy wolt restaurant page with me\n' +
+                'Share a busy wolt restaurant page with me ' +
                 'and I\'ll message you when it comes back online\n' +
                 '🌯 🍔 😋 🍕 🥡');
 
