@@ -151,6 +151,6 @@ const theLoop = async () => {
     }
 }
 
-server.listen(port, () => console.log(`Proxy dashboard listening on port ${port}!`));
+server.listen(port, () => console.log(`isitbusy listening on port ${port}!`));
 
 setInterval(theLoop, 60000);
