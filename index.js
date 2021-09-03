@@ -20,7 +20,7 @@ app.get('/job', (_, res) => {
 });
 
 app.post('/job', (req, res) => {
-    const {chatId, slug} = req.body
+    const { chatId, slug } = req.body
     jobs[chatId] = slug;
     res.statusCode = 200;
     res.end('ok');
@@ -84,7 +84,7 @@ const getRestaurant = async (slug) => {
 const getTimeOfDayInMillis = (timezone) => {
     const nowUTC = Date.now();
     const offsetInMinutes = moment.tz.zone(timezone || 'Asia/Jerusalem').utcOffset(nowUTC)
-    const offsetInMillis = offsetInMinutes * 60 * 1000; 
+    const offsetInMillis = offsetInMinutes * 60 * 1000;
     return (nowUTC - offsetInMillis) % MILLISECONDS_IN_A_DAY;
 }
 
@@ -127,22 +127,26 @@ const theLoop = async () => {
 
     const chatIds = Object.keys(jobs);
     for (const chatId of chatIds) {
-        const slug = jobs[chatId];
-        console.log(`checking restaurant ${slug} for chatId ${chatId}`);
+        try {
+            const slug = jobs[chatId];
+            console.log(`checking restaurant ${slug} for chatId ${chatId}`);
 
-        const restaurant = await getRestaurant(slug);
+            const restaurant = await getRestaurant(slug);
 
-        if (isClosedForDelivery(restaurant)) {
-            console.log(`${slug} is now closed`);
-            sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
-            delete jobs[chatId];
-        } else if (restaurant.online) {
-            console.log(`${slug} is back online`);
-            sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
-            delete jobs[chatId];
-        } else {
-            console.log(`${slug} is still offline`);
-            // sendTelegramMessage(chatId, `Still offline 😔`);
+            if (isClosedForDelivery(restaurant)) {
+                console.log(`${slug} is now closed`);
+                sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
+                delete jobs[chatId];
+            } else if (restaurant.online) {
+                console.log(`${slug} is back online`);
+                sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
+                delete jobs[chatId];
+            } else {
+                console.log(`${slug} is still offline`);
+                // sendTelegramMessage(chatId, `Still offline 😔`);
+            }
+        } catch (e) {
+            console.error("loop error", e);
         }
     }
 }
