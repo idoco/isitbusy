@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const got = require('got');
 const jsonpath = require('jsonpath');
+const moment = require('moment-timezone');
 
 const app = express();
 const server = http.createServer(app);
@@ -80,7 +81,12 @@ const getRestaurant = async (slug) => {
     return response.results[0];
 }
 
-const getTimeOfDayInMillis = (timezone) => Date.now(timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
+const getTimeOfDayInMillis = (timezone) => {
+    const nowUTC = Date.now();
+    const offsetInMinutes = moment.tz.zone(timezone || 'Asia/Jerusalem').utcOffset(nowUTC)
+    const offsetInMillis = offsetInMinutes * 60 * 1000; 
+    return (nowUTC - offsetInMillis) % MILLISECONDS_IN_A_DAY;
+}
 
 const getDeliveryHours = (restaurant) => {
 
