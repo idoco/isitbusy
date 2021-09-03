@@ -79,7 +79,7 @@ const getRestaurant = async (slug) => {
     return response.results[0]
 }
 
-const getTimeOfDayInMillis = (timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
+const getTimeOfDayInMillis = (timezone) => Date.now(timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
 
 const getDeliveryHours = (restaurant) => {
 
