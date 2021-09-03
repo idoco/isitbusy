@@ -17,7 +17,7 @@ const getAsync = promisify(client.get).bind(client);
 const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 
-client.on("connect", function () {
+client.on("connect", async function () {
     console.log('redis connect');
     await client.setAsync("chatId.1", "async.test.a");
     await client.setAsync("chatId.3", "async.test.c");
