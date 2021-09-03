@@ -19,12 +19,12 @@ const keysAsync = promisify(client.keys).bind(client);
 
 client.on("connect", async function () {
     console.log('redis connect');
-    await client.setAsync("chatId.1", "async.test.a");
-    await client.setAsync("chatId.3", "async.test.c");
-    const keys = await client.keysAsync("chatId.*");
+    await setAsync("chatId.1", "async.test.a");
+    await setAsync("chatId.3", "async.test.c");
+    const keys = await keysAsync("chatId.*");
     console.log('keys', keys);
     for (const key of keys) {
-        const value = await client.getAsync(key);
+        const value = await getAsync(key);
         console.log('value', value)
     }
 });
