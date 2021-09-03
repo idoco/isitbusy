@@ -14,9 +14,9 @@ const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'frida
 // todo: move to redis
 const jobs = {};
 
-app.get('/test', (_, res) => {
+app.get('/jobs', (_, res) => {
     res.statusCode = 200;
-    res.end('yes, this is dog');
+    res.json(jobs);
 });
 
 app.post('/test', (req, res) => {
@@ -92,8 +92,8 @@ const getDeliveryHours = (restaurant) => {
 
     console.log('schedule', JSON.stringify(schedule, null, 4));
 
-    const open = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'open')].value`).$date || MILLISECONDS_IN_A_DAY;
-    const close = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'close')].value`).$date || 0;
+    const open = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'open')].value['$date']`)[0] || MILLISECONDS_IN_A_DAY;
+    const close = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'close')].value['$date']`)[0] || 0;
 
     return { open, close };
 }
