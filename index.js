@@ -12,22 +12,21 @@ const redis = require('redis');
 const { promisify } = require("util");
 
 const client = redis.createClient(process.env.REDIS_URL);
-const getAsync = promisify(client.get).bind(client);
 const setAsync = promisify(client.set).bind(client);
+const getAsync = promisify(client.get).bind(client);
+const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 
 client.on("connect", function () {
     console.log('redis connect');
-    client.set("chatId.1", "test1");
-    client.set("chatId.3", "test2");
-    client.keys("chatId.*", (err, keys) => {
-        console.log('keys', keys)
-        for (const key of keys) {
-            client.get(key, (err, value) => {
-                console.log('value', value)
-            });
-        }
-    });
+    await client.setAsync("chatId.1", "async.test.a");
+    await client.setAsync("chatId.3", "async.test.c");
+    const keys = await client.keysAsync("chatId.*");
+    console.log('keys', keys);
+    for (const key of keys) {
+        const value = await client.getAsync(key);
+        console.log('value', value)
+    }
 });
 
 const port = process.env.PORT || process.argv[2] || 3000;
