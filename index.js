@@ -1,12 +1,15 @@
 const express = require('express');
 const http = require('http');
 const got = require('got');
+const jsonpath = require('jsonpath');
 
 const app = express();
 const server = http.createServer(app);
 app.use(express.json());
 
 const port = process.env.PORT || process.argv[2] || 3000;
+const MILLISECONDS_IN_A_DAY = 86400000;
+const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 // todo: move to redis
 const jobs = {};
@@ -45,10 +48,12 @@ app.post('/hook', async (req, res) => {
             try {
                 const url = new URL(text.trim());
                 const slug = url.pathname.split('/').pop();
-                const status = await checkRestaurantStatus(slug);
-                console.log(`status ${status}`)
 
-                if (status) {
+                const restaurant = await getRestaurant(slug);
+
+                if (isClosedForDelivery(restaurant)) {
+                    sendTelegramMessage(chatId, `It seems that the restaurant is currently closed, let's try a different one 🤔`);
+                } else if (restaurant.online) {
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
                 } else {
                     sendTelegramMessage(chatId, `Oh, I see that it is currently offline. I'll ping you when it comes back online 🙃`);
@@ -68,10 +73,37 @@ app.post('/hook', async (req, res) => {
     res.end();
 });
 
-const checkRestaurantStatus = async (slug) => {
-    const res = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`)
-        .json();
-    return res.results[0].online;
+const getRestaurant = async (slug) => {
+    return await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`)
+        .json().results[0];
+}
+
+const getTimeOfDayInMillis = () => Date.now(restaurant.timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
+
+const getDeliveryHours = (restaurant) => {
+
+    const weekday = new Date().toLocaleString("en-US", {
+        timeZone: restaurant.timezone || "Asia/Jerusalem",
+        weekday: 'long'
+    }).toLocaleLowerCase()
+
+    const schedule = restaurant.delivery_specs.delivery_times;
+
+    console.log('schedule', schedule);
+
+    const open = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'open')]..$date`) || 0;
+    const close = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'close')]..$date`) || MILLISECONDS_IN_A_DAY;
+
+    return { open, close };
+}
+
+const isClosedForDelivery = (restaurant) => {
+    const timeOfDayInMillis = getTimeOfDayInMillis()
+    const { open, close } = getDeliveryHours(restaurant);
+
+    console.log('isClosedForDelivery', timeOfDayInMillis, open, close);
+
+    return timeOfDayInMillis < open || timeOfDayInMillis > close;
 }
 
 const sendTelegramMessage = async (chat_id, text) => {
@@ -90,10 +122,14 @@ const theLoop = async () => {
     const chatIds = Object.keys(jobs);
     for (const chatId of chatIds) {
         const slug = jobs[chatId];
-        console.log(`checking chatId ${chatId} for slug ${slug}`);
-        const status = await checkRestaurantStatus(slug);
+        console.log(`checking restaurant ${slug} for chatId ${chatId}`);
 
-        if (status) {
+        const restaurant = await getRestaurant(slug);
+
+        if (isClosedForDelivery(restaurant)) {
+            sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
+            delete jobs[chatId];
+        } else if (restaurant.online) {
             sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
             delete jobs[chatId];
         } else {

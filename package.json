@@ -23,6 +23,7 @@
   "homepage": "https://github.com/idoco/isitbusy#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "got": "^11.8.2"
+    "got": "^11.8.2",
+    "jsonpath": "^1.1.1"
   }
 }
