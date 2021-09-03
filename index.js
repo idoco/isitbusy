@@ -90,7 +90,7 @@ const getDeliveryHours = (restaurant) => {
 
     const schedule = restaurant.delivery_specs.delivery_times;
 
-    console.log('schedule', schedule);
+    console.log('schedule', JSON.stringify(schedule, null, 4));
 
     const open = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'open')].value`).$date || MILLISECONDS_IN_A_DAY;
     const close = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'close')].value`).$date || 0;
