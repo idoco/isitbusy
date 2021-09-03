@@ -41,7 +41,7 @@ app.post('/hook', async (req, res) => {
             sendTelegramMessage(chatId, `Stopping. Home cooked meals are the best 😏`);
 
         } else if (text) {
-            console.log(`incoming message ${text} from ${chatId}`)
+            console.log(`incoming message "${text}" from ${chatId}`)
             try {
                 const url = new URL(text.trim());
                 const slug = url.pathname.split('/').pop();
@@ -86,7 +86,6 @@ const sendTelegramMessage = async (chat_id, text) => {
 }
 
 const theLoop = async () => {
-    console.log('do the loop');
 
     const chatIds = Object.keys(jobs);
     for (const chatId of chatIds) {
