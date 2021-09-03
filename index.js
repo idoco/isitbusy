@@ -127,13 +127,16 @@ const theLoop = async () => {
         const restaurant = await getRestaurant(slug);
 
         if (isClosedForDelivery(restaurant)) {
+            console.log(`${slug} is now closed`);
             sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
             delete jobs[chatId];
         } else if (restaurant.online) {
+            console.log(`${slug} is back online`);
             sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
             delete jobs[chatId];
         } else {
-            sendTelegramMessage(chatId, `Still offline 😔`);
+            console.log(`${slug} is still offline`);
+            // sendTelegramMessage(chatId, `Still offline 😔`);
         }
     }
 }
