@@ -22,7 +22,7 @@ client.on("connect", function () {
     client.set("chatId.3", "test2");
     client.keys("chatId.*", (err, keys) => {
         console.log('keys', keys)
-        for (const key in keys) {
+        for (const key of keys) {
             client.get(key, (err, value) => {
                 console.log('value', value)
             });
