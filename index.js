@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const got = require('got');
-const redis = require('redis');
 const jsonpath = require('jsonpath');
 const moment = require('moment-timezone');
 
@@ -9,13 +8,21 @@ const app = express();
 const server = http.createServer(app);
 app.use(express.json());
 
+const redis = require('redis');
 const client = redis.createClient(process.env.REDIS_URL);
 
-client.on("connect", function() {
+client.on("connect", function () {
     console.log('redis connect');
     client.set("chatId.1", "test1");
-    client.set("chatId.3", "test1");
-    client.keys("chatId.*", (err, reply) => console.log(reply));
+    client.set("chatId.3", "test2");
+    client.keys("chatId.*", (err, keys) => {
+        console.log('keys', keys)
+        for (const key in keys) {
+            client.get(key, (err, value) => {
+                console.log('value', value)
+            });
+        }
+    });
 });
 
 const port = process.env.PORT || process.argv[2] || 3000;
