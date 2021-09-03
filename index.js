@@ -9,7 +9,6 @@ app.use(express.json());
 
 const port = process.env.PORT || process.argv[2] || 3000;
 const MILLISECONDS_IN_A_DAY = 86400000;
-const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 // todo: move to redis
 const jobs = {};
@@ -78,7 +77,7 @@ app.post('/hook', async (req, res) => {
 const getRestaurant = async (slug) => {
     const response = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`)
         .json();
-    return response.results[0]
+    return response.results[0];
 }
 
 const getTimeOfDayInMillis = (timezone) => Date.now(timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
@@ -99,7 +98,7 @@ const getDeliveryHours = (restaurant) => {
 }
 
 const isClosedForDelivery = (restaurant) => {
-    const timeOfDayInMillis = getTimeOfDayInMillis(restaurant.timezone)
+    const timeOfDayInMillis = getTimeOfDayInMillis(restaurant.timezone);
     const { open, close } = getDeliveryHours(restaurant);
 
     console.log('isClosedForDelivery', timeOfDayInMillis, open, close);
