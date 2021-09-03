@@ -79,7 +79,7 @@ const getRestaurant = async (slug) => {
     return response.results[0]
 }
 
-const getTimeOfDayInMillis = () => Date.now(restaurant.timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
+const getTimeOfDayInMillis = (timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
 
 const getDeliveryHours = (restaurant) => {
 
@@ -99,7 +99,7 @@ const getDeliveryHours = (restaurant) => {
 }
 
 const isClosedForDelivery = (restaurant) => {
-    const timeOfDayInMillis = getTimeOfDayInMillis()
+    const timeOfDayInMillis = getTimeOfDayInMillis(restaurant.timezone)
     const { open, close } = getDeliveryHours(restaurant);
 
     console.log('isClosedForDelivery', timeOfDayInMillis, open, close);
