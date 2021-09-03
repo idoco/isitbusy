@@ -1,12 +1,22 @@
 const express = require('express');
 const http = require('http');
 const got = require('got');
+const redis = require('redis');
 const jsonpath = require('jsonpath');
 const moment = require('moment-timezone');
 
 const app = express();
 const server = http.createServer(app);
 app.use(express.json());
+
+const client = redis.createClient(process.env.REDIS_URL);
+
+client.on("connect", function() {
+    console.log('redis connect');
+    client.set("chatId.1", "test1");
+    client.set("chatId.3", "test1");
+    client.keys("chatId.*", (err, reply) => console.log(reply));
+});
 
 const port = process.env.PORT || process.argv[2] || 3000;
 const MILLISECONDS_IN_A_DAY = 86400000;
