@@ -74,8 +74,9 @@ app.post('/hook', async (req, res) => {
 });
 
 const getRestaurant = async (slug) => {
-    return await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`)
-        .json().results[0];
+    const response = await got.get(`https://restaurant-api.wolt.com/v3/venues/slug/${slug}`)
+        .json();
+    return response.results[0]
 }
 
 const getTimeOfDayInMillis = () => Date.now(restaurant.timezone || "Asia/Jerusalem") % MILLISECONDS_IN_A_DAY;
