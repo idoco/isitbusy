@@ -148,7 +148,7 @@ const sendTelegramMessage = async (chat_id, text) => {
 
 const theLoop = async () => {
 
-    const jobs = await getJobs(chatIds);
+    const jobs = await getJobs();
     const chatIds = Object.keys(jobs);
 
     for (const chatId of chatIds) {
