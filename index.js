@@ -161,7 +161,7 @@ const getDeliverySchedule = (restaurant) => {
 const isClosedForDelivery = (restaurant) => {
     const timeOfDayInMillis = getTimeOfDayInMillis(restaurant.timezone);
     schedule = getDeliverySchedule(restaurant);
-    const isOpen = isOpenNow(timeOfDayInMillis, restaurant.delivery_specs.delivery_times);
+    const isOpen = isOpenNow(timeOfDayInMillis, schedule);
 
     console.log('isClosedForDelivery', timeOfDayInMillis, schedule, isOpen);
 
