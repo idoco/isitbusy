@@ -121,6 +121,8 @@ const getTimeOfDayInMillis = (timezone) => {
 
 const isOpenNow = (now, schedule) => {
 
+    console.log('isOpenNow', schedule);
+
     if (schedule.length == 0) return false;
 
     const firstEventIsClose = schedule[0].type == 'close'
