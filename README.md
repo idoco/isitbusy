@@ -1,4 +1,4 @@
-# isitbusy - [Demo](https://youtu.be/jZCJEwmy0vk)
+# isitbusy - [try it](https://t.me/IsItBusyBot)
 
 ### How to use it
 1. Use this [link](https://t.me/IsItBusyBot) or open [Telegram](https://web.telegram.org/) to search for `@IsItBusyBot` and hit `/start`
