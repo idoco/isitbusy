@@ -8,6 +8,14 @@ const { promisify } = require("util");
 
 const port = process.env.PORT || process.argv[2] || 3000;
 const MILLISECONDS_IN_A_DAY = 86400000;
+const IMPLICIT_OPEN_EVENT = {
+    "type": "open",
+    "value": { "$date": 0 }
+}
+const IMPLICIT_CLOSE_EVENT = {
+    "type": "open",
+    "value": { "$date": MILLISECONDS_IN_A_DAY }
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -111,28 +119,51 @@ const getTimeOfDayInMillis = (timezone) => {
     return (nowUTC - offsetInMillis) % MILLISECONDS_IN_A_DAY;
 }
 
-const getDeliveryHours = (restaurant) => {
+const isOpenNow = (now, schedule) => {
+
+    if (schedule.length == 0) return false;
+
+    const firstEventIsClose = schedule[0].type == 'close'
+    const lastEventIsOpen = schedule[schedule.length - 1].type == 'open'
+
+    if (firstEventIsClose) {
+        schedule = [IMPLICIT_OPEN_EVENT, ...schedule];
+    } else if (lastEventIsOpen) {
+        schedule = [...schedule, IMPLICIT_CLOSE_EVENT];
+    }
+
+    for (let i = 0; i < schedule.length; i = i + 2) {
+        const open = schedule[i].value.$date;
+        const close = schedule[i + 1].value.$date;
+
+        if (open < now && now < close) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const getDeliverySchedule = (restaurant) => {
 
     const weekday = new Date().toLocaleString("en-US", {
         timeZone: restaurant.timezone || "Asia/Jerusalem",
         weekday: 'long'
     }).toLocaleLowerCase()
 
-    const schedule = restaurant.delivery_specs.delivery_times;
+    const todaysSchedule = restaurant.delivery_specs.delivery_times[weekday];
 
-    const open = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'open')].value['$date']`)[0] || MILLISECONDS_IN_A_DAY;
-    const close = jsonpath.query(schedule, `$['${weekday}'][?(@.type == 'close')].value['$date']`)[0] || 0;
-
-    return { open, close };
+    return todaysSchedule;
 }
 
 const isClosedForDelivery = (restaurant) => {
     const timeOfDayInMillis = getTimeOfDayInMillis(restaurant.timezone);
-    const { open, close } = getDeliveryHours(restaurant);
+    schedule = getDeliverySchedule(restaurant);
+    const isOpen = isOpenNow(timeOfDayInMillis, restaurant.delivery_specs.delivery_times);
 
-    console.log('isClosedForDelivery', timeOfDayInMillis, open, close);
+    console.log('isClosedForDelivery', timeOfDayInMillis, schedule, isOpen);
 
-    return timeOfDayInMillis < open || timeOfDayInMillis > close;
+    return isOpen;
 }
 
 const sendTelegramMessage = async (chat_id, text) => {
