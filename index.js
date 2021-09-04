@@ -1,7 +1,6 @@
 const express = require('express');
 const http = require('http');
 const got = require('got');
-const jsonpath = require('jsonpath');
 const moment = require('moment-timezone');
 const redis = require('redis');
 const { promisify } = require("util");
