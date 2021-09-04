@@ -13,7 +13,7 @@ const IMPLICIT_OPEN_EVENT = {
     "value": { "$date": 0 }
 }
 const IMPLICIT_CLOSE_EVENT = {
-    "type": "open",
+    "type": "close",
     "value": { "$date": MILLISECONDS_IN_A_DAY }
 }
 
@@ -121,7 +121,7 @@ const getTimeOfDayInMillis = (timezone) => {
 
 const isOpenNow = (now, schedule) => {
 
-    console.log('isOpenNow', schedule);
+    console.log('isOpenNow1', schedule);
 
     if (schedule.length == 0) return false;
 
@@ -133,6 +133,8 @@ const isOpenNow = (now, schedule) => {
     } else if (lastEventIsOpen) {
         schedule = [...schedule, IMPLICIT_CLOSE_EVENT];
     }
+
+    console.log('isOpenNow2', schedule);
 
     for (let i = 0; i < schedule.length; i = i + 2) {
         const open = schedule[i].value.$date;
@@ -165,7 +167,7 @@ const isClosedForDelivery = (restaurant) => {
 
     console.log('isClosedForDelivery', timeOfDayInMillis, schedule, isOpen);
 
-    return isOpen;
+    return !isOpen;
 }
 
 const sendTelegramMessage = async (chat_id, text) => {
