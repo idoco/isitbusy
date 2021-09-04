@@ -36,14 +36,40 @@ const MILLISECONDS_IN_A_DAY = 86400000;
 // todo: move to redis
 const jobs = {};
 
+const getJobs = async () => {
+    const jobs = {};
+    const keys = await keysAsync("chatId.*");
+    for (const key of keys) {
+        const value = await getAsync(key);
+        chats[key.split('.')[1]] = value;
+    }
+    return jobs;
+}
+
+const addJob = async (chatId, slug) => {
+    return await setAsync(`chatId.${chatId}`, slug);
+}
+
+const deleteJob = async (chatId) => {
+    return await delAsync(`chatId.${chatId}`);
+}
+
 app.get('/job', (_, res) => {
+    const jobs = await getJobs();
     res.statusCode = 200;
     res.json(jobs);
 });
 
 app.post('/job', (req, res) => {
     const { chatId, slug } = req.body
-    jobs[chatId] = slug;
+    await addJob(chatId, slug);
+    res.statusCode = 200;
+    res.end('ok');
+});
+
+app.delete('/job', (req, res) => {
+    const { chatId } = req.body
+    await deleteJob(chatId);
     res.statusCode = 200;
     res.end('ok');
 });
