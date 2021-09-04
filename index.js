@@ -28,7 +28,7 @@ const getJobs = async () => {
     const keys = await keysAsync("chatId.*");
     for (const key of keys) {
         const value = await getAsync(key);
-        chats[key.split('.')[1]] = value;
+        jobs[key.split('.')[1]] = value;
     }
     return jobs;
 }
