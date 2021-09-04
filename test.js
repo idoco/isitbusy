@@ -66,7 +66,7 @@ const IMPLICIT_OPEN_EVENT = {
     "value": { "$date": 0 }
 }
 const IMPLICIT_CLOSE_EVENT = {
-    "type": "open",
+    "type": "close",
     "value": { "$date": MILLISECONDS_IN_A_DAY }
 }
 
@@ -80,7 +80,9 @@ const isOpenNow = (now, schedule) => {
 
     if (firstEventIsClose) {
         schedule = [IMPLICIT_OPEN_EVENT, ...schedule];
-    } else if (lastEventIsOpen) {
+    } 
+    
+    if (lastEventIsOpen) {
         schedule = [...schedule, IMPLICIT_CLOSE_EVENT];
     }
 

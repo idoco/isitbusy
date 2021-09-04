@@ -85,10 +85,13 @@ app.post('/hook', async (req, res) => {
                 const restaurant = await getRestaurant(slug);
 
                 if (isClosedForDelivery(restaurant)) {
+                    console.log(`${slug} is closed`);
                     sendTelegramMessage(chatId, `It seems that the restaurant is currently closed, let's try a different one 🤔`);
                 } else if (restaurant.online) {
+                    console.log(`${slug} is online`);
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
                 } else {
+                    console.log(`${slug} is having a rush, adding job`);
                     sendTelegramMessage(chatId, `Oh, I see that it is currently offline. I'll ping you when it comes back online 🙃`);
                     await addJob(chatId, slug)
                 }
@@ -121,8 +124,6 @@ const getTimeOfDayInMillis = (timezone) => {
 
 const isOpenNow = (now, schedule) => {
 
-    console.log('isOpenNow1', schedule);
-
     if (schedule.length == 0) return false;
 
     const firstEventIsClose = schedule[0].type == 'close'
@@ -130,11 +131,11 @@ const isOpenNow = (now, schedule) => {
 
     if (firstEventIsClose) {
         schedule = [IMPLICIT_OPEN_EVENT, ...schedule];
-    } else if (lastEventIsOpen) {
+    } 
+    
+    if (lastEventIsOpen) {
         schedule = [...schedule, IMPLICIT_CLOSE_EVENT];
     }
-
-    console.log('isOpenNow2', schedule);
 
     for (let i = 0; i < schedule.length; i = i + 2) {
         const open = schedule[i].value.$date;
@@ -162,10 +163,10 @@ const getDeliverySchedule = (restaurant) => {
 
 const isClosedForDelivery = (restaurant) => {
     const timeOfDayInMillis = getTimeOfDayInMillis(restaurant.timezone);
-    schedule = getDeliverySchedule(restaurant);
+    const schedule = getDeliverySchedule(restaurant);
     const isOpen = isOpenNow(timeOfDayInMillis, schedule);
 
-    console.log('isClosedForDelivery', timeOfDayInMillis, schedule, isOpen);
+    // console.log('isClosedForDelivery', timeOfDayInMillis, schedule, isOpen);
 
     return !isOpen;
 }
