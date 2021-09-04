@@ -68,7 +68,8 @@ app.post('/hook', async (req, res) => {
                 '*Is it busy?*\n' +
                 'Share a busy wolt restaurant page with me ' +
                 'and I\'ll message you when it comes back online\n' +
-                '🌯 🍔 😋 🍕 🥡');
+                '🌯 🍔 😋 🍕 🥡\n\n' + 
+                '[Video demo](https://youtu.be/jZCJEwmy0vk)');
 
         } else if (text.startsWith("/stop")) {
             console.log(`/stop chatId ${chatId}`);
