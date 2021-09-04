@@ -86,7 +86,7 @@ app.post('/hook', async (req, res) => {
 
                 if (isClosedForDelivery(restaurant)) {
                     console.log(`${slug} is closed`);
-                    sendTelegramMessage(chatId, `It seems that the restaurant is currently closed, let's try a different one 🤔`);
+                    sendTelegramMessage(chatId, `This restaurant is outside working hours, let's try a different one 🤔`);
                 } else if (restaurant.online) {
                     console.log(`${slug} is online`);
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
