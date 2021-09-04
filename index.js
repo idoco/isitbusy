@@ -3,13 +3,15 @@ const http = require('http');
 const got = require('got');
 const jsonpath = require('jsonpath');
 const moment = require('moment-timezone');
+const redis = require('redis');
+const { promisify } = require("util");
+
+const port = process.env.PORT || process.argv[2] || 3000;
+const MILLISECONDS_IN_A_DAY = 86400000;
 
 const app = express();
 const server = http.createServer(app);
 app.use(express.json());
-
-const redis = require('redis');
-const { promisify } = require("util");
 
 const client = redis.createClient(process.env.REDIS_URL);
 const setAsync = promisify(client.set).bind(client);
@@ -17,45 +19,31 @@ const getAsync = promisify(client.get).bind(client);
 const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 
-const port = process.env.PORT || process.argv[2] || 3000;
-const MILLISECONDS_IN_A_DAY = 86400000;
-
-// todo: move to redis
-const jobs = {};
-
 const getJobs = async () => {
     const jobs = {};
-    const keys = await keysAsync("chatId.*");
+    const keys = await keysAsync("jobs.*");
     for (const key of keys) {
-        const value = await getAsync(key);
-        jobs[key.split('.')[1]] = value;
+        jobs[key.split('.')[1]] = await getAsync(key);
     }
     return jobs;
 }
 
-const addJob = async (chatId, slug) => {
-    return await setAsync(`chatId.${chatId}`, slug);
-}
+const addJob = async (chatId, slug) => await setAsync(`jobs.${chatId}`, slug);
 
-const deleteJob = async (chatId) => {
-    return await delAsync(`chatId.${chatId}`);
-}
+const deleteJob = async (chatId) => await delAsync(`jobs.${chatId}`);
 
 app.get('/job', async (_, res) => {
-    const jobs = await getJobs();
     res.statusCode = 200;
-    res.json(jobs);
+    res.json(await getJobs());
 });
 
-app.post('/job', async (req, res) => {
-    const { chatId, slug } = req.body
+app.post('/job', async ({ body: { chatId, slug } }, res) => {
     await addJob(chatId, slug);
     res.statusCode = 200;
     res.end('ok');
 });
 
-app.delete('/job', async (req, res) => {
-    const { chatId } = req.body
+app.delete('/job', async ({ body: { chatId } }, res) => {
     await deleteJob(chatId);
     res.statusCode = 200;
     res.end('ok');
@@ -77,7 +65,7 @@ app.post('/hook', async (req, res) => {
 
         } else if (text.startsWith("/stop")) {
             console.log(`/stop chatId ${chatId}`);
-            delete jobs[chatId];
+            await deleteJob(chatId);
             sendTelegramMessage(chatId, `Stopping. Home cooked meals are the best 😏`);
 
         } else if (text) {
@@ -94,7 +82,7 @@ app.post('/hook', async (req, res) => {
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
                 } else {
                     sendTelegramMessage(chatId, `Oh, I see that it is currently offline. I'll ping you when it comes back online 🙃`);
-                    jobs[chatId] = slug;
+                    await addJob(chatId, slug)
                 }
 
             } catch (e) {
@@ -160,7 +148,9 @@ const sendTelegramMessage = async (chat_id, text) => {
 
 const theLoop = async () => {
 
+    const jobs = await getJobs(chatIds);
     const chatIds = Object.keys(jobs);
+
     for (const chatId of chatIds) {
         try {
             const slug = jobs[chatId];
@@ -171,14 +161,13 @@ const theLoop = async () => {
             if (isClosedForDelivery(restaurant)) {
                 console.log(`${slug} is now closed`);
                 sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
-                delete jobs[chatId];
+                await deleteJob(chatId);
             } else if (restaurant.online) {
                 console.log(`${slug} is back online`);
                 sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
-                delete jobs[chatId];
+                await deleteJob(chatId);
             } else {
                 console.log(`${slug} is still offline`);
-                // sendTelegramMessage(chatId, `Still offline 😔`);
             }
         } catch (e) {
             console.error("loop error", e);
