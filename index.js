@@ -69,7 +69,7 @@ app.post('/hook', async (req, res) => {
                 'Share a busy wolt restaurant page with me ' +
                 'and I\'ll message you when it comes back online\n' +
                 '🌯 🍔 😋 🍕 🥡\n\n' + 
-                '[Video demo](https://youtu.be/jZCJEwmy0vk)');
+                '[Demo](https://youtu.be/jZCJEwmy0vk)');
 
         } else if (text.startsWith("/stop")) {
             console.log(`/stop chatId ${chatId}`);
@@ -190,7 +190,7 @@ const theLoop = async () => {
     for (const chatId of chatIds) {
         try {
             const slug = jobs[chatId];
-            console.log(`checking restaurant ${slug} for chatId ${chatId}`);
+            console.log(`checking ${slug} for chatId ${chatId}`);
 
             const restaurant = await getRestaurant(slug);
 
