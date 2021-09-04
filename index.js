@@ -17,19 +17,6 @@ const getAsync = promisify(client.get).bind(client);
 const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 
-client.on("connect", async function () {
-    console.log('redis connect');
-    await setAsync("chatId.123", "slug-aaa");
-    await setAsync("chatId.456", "slug-bbb");
-    const keys = await keysAsync("chatId.*");
-    console.log('keys', keys);
-    for (const key of keys) {
-        const value = await getAsync(key);
-        console.log('value', value)
-        delAsync(key);
-    }
-});
-
 const port = process.env.PORT || process.argv[2] || 3000;
 const MILLISECONDS_IN_A_DAY = 86400000;
 
@@ -54,20 +41,20 @@ const deleteJob = async (chatId) => {
     return await delAsync(`chatId.${chatId}`);
 }
 
-app.get('/job', (_, res) => {
+app.get('/job', async (_, res) => {
     const jobs = await getJobs();
     res.statusCode = 200;
     res.json(jobs);
 });
 
-app.post('/job', (req, res) => {
+app.post('/job', async (req, res) => {
     const { chatId, slug } = req.body
     await addJob(chatId, slug);
     res.statusCode = 200;
     res.end('ok');
 });
 
-app.delete('/job', (req, res) => {
+app.delete('/job', async (req, res) => {
     const { chatId } = req.body
     await deleteJob(chatId);
     res.statusCode = 200;
