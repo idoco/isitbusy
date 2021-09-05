@@ -60,7 +60,7 @@ app.post('/hook', async (req, res) => {
     try {
         const message = req.body.message || req.body.channel_post;
         const chatId = message.chat.id;
-        const text = message.text || "empty";
+        const text = (message.text || "empty").trim();
 
         if (text.startsWith("/start")) {
             console.log(`/start chatId ${chatId}`);
@@ -79,7 +79,8 @@ app.post('/hook', async (req, res) => {
         } else if (text) {
             console.log(`incoming request for "${text}" from ${chatId}`)
             try {
-                const url = new URL(text.trim());
+                const parts = text.split(' ');
+                const url = new URL(parts[parts.length - 1]);
                 const slug = url.pathname.split('/').pop();
 
                 const restaurant = await getRestaurant(slug);
