@@ -79,7 +79,7 @@ app.post('/hook', async (req, res) => {
         } else if (text) {
             console.log(`incoming request for "${text}" from ${chatId}`)
             try {
-                const parts = text.split(' ');
+                const parts = text.split('\s');
                 const url = new URL(parts[parts.length - 1]);
                 const slug = url.pathname.split('/').pop();
 
