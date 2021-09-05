@@ -80,7 +80,7 @@ app.post('/hook', async (req, res) => {
             console.log(`incoming request for "${text}" from ${chatId}`)
             try {
                 const parts = text.split('\n');
-                const url = new URL(parts[parts.length - 1]);
+                const url = new URL(parts[parts.length - 1].trim());
                 const slug = url.pathname.split('/').pop();
 
                 const restaurant = await getRestaurant(slug);
