@@ -44,16 +44,23 @@ app.get('/job', async (_, res) => {
     res.json(await getJobs());
 });
 
-app.post('/job', async ({ body: { chatId, slug } }, res) => {
-    await addJob(chatId, slug);
-    res.statusCode = 200;
-    res.end('ok');
+app.post('/job', async ({ body: { chatId, slug }, query: { key } }, res) => {
+    if (process.env.KEY == key) {
+        await addJob(chatId, slug);
+        res.status(200).end('ok');
+    } else {
+        res.status(401).end('nope');
+    }
 });
 
-app.delete('/job', async ({ body: { chatId } }, res) => {
-    await deleteJob(chatId);
-    res.statusCode = 200;
-    res.end('ok');
+app.delete('/job', async ({ body: { chatId }, query: { key } }, res) => {
+    if (process.env.KEY == key) {
+        console.log('delete');
+        await deleteJob(chatId);
+        res.status(200).end('ok');
+    } else {
+        res.status(401).end('nope');
+    }
 });
 
 app.post('/hook', async (req, res) => {
@@ -68,7 +75,7 @@ app.post('/hook', async (req, res) => {
                 '*Is it busy?*\n' +
                 'Share a busy wolt restaurant page with me ' +
                 'and I\'ll message you when it comes back online\n' +
-                '🌯 🍔 😋 🍕 🥡\n\n' + 
+                '🌯 🍔 😋 🍕 🥡\n\n' +
                 '[Demo](https://youtu.be/jZCJEwmy0vk)');
 
         } else if (text.startsWith("/stop")) {
@@ -132,8 +139,8 @@ const isOpenNow = (now, schedule) => {
 
     if (firstEventIsClose) {
         schedule = [IMPLICIT_OPEN_EVENT, ...schedule];
-    } 
-    
+    }
+
     if (lastEventIsOpen) {
         schedule = [...schedule, IMPLICIT_CLOSE_EVENT];
     }
