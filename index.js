@@ -55,7 +55,6 @@ app.post('/job', async ({ body: { chatId, slug }, query: { key } }, res) => {
 
 app.delete('/job', async ({ body: { chatId }, query: { key } }, res) => {
     if (process.env.KEY == key) {
-        console.log('delete');
         await deleteJob(chatId);
         res.status(200).end('ok');
     } else {
