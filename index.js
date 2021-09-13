@@ -62,6 +62,14 @@ app.delete('/job', async ({ body: { chatId }, query: { key } }, res) => {
     }
 });
 
+app.post('/whatsapp', async (req, res) => {
+    try {
+        console.log('whatsapp message', JSON.stringify(req.body, null, 4));
+    } catch (e) {
+        console.error('whatsapp error', e);
+    }
+});
+
 app.post('/hook', async (req, res) => {
     try {
         const message = req.body.message || req.body.channel_post;
