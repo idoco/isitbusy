@@ -26,18 +26,18 @@ const getAsync = promisify(client.get).bind(client);
 const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 
-const getJobs = async () => {
-    const jobs = {};
-    const keys = await keysAsync("jobs.*");
+const getJobs = async () => await keysAsync("jobs.*");
+
+const addJob = async (chatId, slug) => await setAsync(`jobs.${chatId}.${slug}`, 1);
+
+const deleteJob = async (chatId, slug) => await delAsync(`jobs.${chatId}.${slug}`);
+
+const deleteAllChatJobs = async (chatId) => {
+    const keys = await keysAsync(`jobs.${chatId}`);
     for (const key of keys) {
-        jobs[key.split('.')[1]] = await getAsync(key);
+        await delAsync(key)
     }
-    return jobs;
 }
-
-const addJob = async (chatId, slug) => await setAsync(`jobs.${chatId}`, slug);
-
-const deleteJob = async (chatId) => await delAsync(`jobs.${chatId}`);
 
 app.get('/job', async (_, res) => {
     res.statusCode = 200;
@@ -89,7 +89,7 @@ app.post('/hook', async (req, res) => {
 
         } else if (text.startsWith("/stop")) {
             console.log(`/stop chatId ${chatId}`);
-            await deleteJob(chatId);
+            await deleteAllChatJobs(chatId);
             sendTelegramMessage(chatId, `Stopping. Home cooked meals are the best 😏`);
 
         } else if (text) {
@@ -200,25 +200,21 @@ const sendTelegramMessage = async (chat_id, text) => {
 }
 
 const theLoop = async () => {
-
     const jobs = await getJobs();
-    const chatIds = Object.keys(jobs);
-
-    for (const chatId of chatIds) {
+    for (const job of jobs) {
+        const [, chatId, slug] = job.split('.');
         try {
-            const slug = jobs[chatId];
             console.log(`checking ${slug} for chatId ${chatId}`);
-
             const restaurant = await getRestaurant(slug);
 
             if (isClosedForDelivery(restaurant)) {
                 console.log(`${slug} is now closed`);
                 sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
-                await deleteJob(chatId);
+                await deleteJob(chatId, slug);
             } else if (restaurant.online) {
                 console.log(`${slug} is back online`);
                 sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
-                await deleteJob(chatId);
+                await deleteJob(chatId, slug);
             } else {
                 console.log(`${slug} is still offline`);
             }
