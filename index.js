@@ -22,7 +22,6 @@ app.use(express.json());
 
 const client = redis.createClient(process.env.REDIS_URL);
 const setAsync = promisify(client.set).bind(client);
-const getAsync = promisify(client.get).bind(client);
 const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
 
@@ -56,6 +55,17 @@ app.post('/job', async ({ body: { chatId, slug }, query: { key } }, res) => {
 app.delete('/job', async ({ body: { chatId }, query: { key } }, res) => {
     if (process.env.KEY == key) {
         await deleteJob(chatId);
+        res.status(200).end('ok');
+    } else {
+        res.status(401).end('nope');
+    }
+});
+
+app.post('/contact', async ({ body: { chatIds, message }, query: { key } }, res) => {
+    if (process.env.KEY == key) {
+        for (const chatId of chatIds) {
+            sendTelegramMessage(chatId, message);
+        }
         res.status(200).end('ok');
     } else {
         res.status(401).end('nope');
