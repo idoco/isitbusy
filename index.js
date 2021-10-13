@@ -209,11 +209,11 @@ const theLoop = async () => {
 
             if (isClosedForDelivery(restaurant)) {
                 console.log(`${slug} is now closed`);
-                sendTelegramMessage(chatId, `It seems that the restaurant is closed for today 😢`);
+                sendTelegramMessage(chatId, `It seems that ${slug} is closed for today 😢`);
                 await deleteJob(chatId, slug);
             } else if (restaurant.online) {
                 console.log(`${slug} is back online`);
-                sendTelegramMessage(chatId, `The restaurant is back online! Go 🏃`);
+                sendTelegramMessage(chatId, `${slug} is back online! Go 🏃`);
                 await deleteJob(chatId, slug);
             } else {
                 console.log(`${slug} is still offline`);
