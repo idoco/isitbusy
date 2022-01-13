@@ -183,9 +183,7 @@ const isClosedForDelivery = (restaurant) => {
     const schedule = getDeliverySchedule(restaurant);
     const isOpen = isOpenNow(timeOfDayInMillis, schedule);
 
-    // console.log('isClosedForDelivery', timeOfDayInMillis, schedule, isOpen);
-
-    return !isOpen;
+    return !isOpen || !restaurant.delivery_specs.delivery_enabled;
 }
 
 const sendTelegramMessage = async (chat_id, text) => {
