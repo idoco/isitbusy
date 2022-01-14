@@ -104,7 +104,7 @@ app.post('/hook', async (req, res) => {
                 if (isClosedForDelivery(restaurant)) {
                     console.log(`${slug} is closed`);
                     sendTelegramMessage(chatId, `This restaurant is outside working hours, let's try a different one 🤔`);
-                } else if (restaurant.online) {
+                } else if (isDelivering(restaurant)) {
                     console.log(`${slug} is online`);
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
                 } else {
@@ -183,8 +183,11 @@ const isClosedForDelivery = (restaurant) => {
     const schedule = getDeliverySchedule(restaurant);
     const isOpen = isOpenNow(timeOfDayInMillis, schedule);
 
-    return !isOpen || !restaurant.delivery_specs.delivery_enabled;
+    return !isOpen;
 }
+
+const isDelivering = (restaurant) => 
+    restaurant.online && restaurant.delivery_specs.delivery_enabled;
 
 const sendTelegramMessage = async (chat_id, text) => {
     got.post(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`,
@@ -209,7 +212,7 @@ const theLoop = async () => {
                 console.log(`${slug} is now closed`);
                 sendTelegramMessage(chatId, `It seems that ${slug} is closed for today 😢`);
                 await deleteJob(chatId, slug);
-            } else if (restaurant.online) {
+            } else if (isDelivering(restaurant)) {
                 console.log(`${slug} is back online`);
                 sendTelegramMessage(chatId, `${slug} is back online! Go 🏃`);
                 await deleteJob(chatId, slug);
