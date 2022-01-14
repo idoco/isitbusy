@@ -108,7 +108,7 @@ app.post('/hook', async (req, res) => {
                     console.log(`${slug} is online`);
                     sendTelegramMessage(chatId, `Quickly! It is currently taking orders 🚴‍♂️`);
                 } else {
-                    console.log(`${slug} is having a rush. Adding a job`);
+                    console.log(`${slug} is currently not delivering orders. Adding a job`);
                     sendTelegramMessage(chatId, `Oh, I see that it is currently offline. I'll ping you when it comes back online 🙃`);
                     await addJob(chatId, slug)
                 }
