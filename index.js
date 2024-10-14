@@ -20,7 +20,13 @@ const app = express();
 const server = http.createServer(app);
 app.use(express.json());
 
-const client = redis.createClient(process.env.REDIS_URL);
+const client = redis.createClient({
+    url: process.env.REDIS_URL,
+    tls: {
+        rejectUnauthorized: false
+    }
+});
+
 const setAsync = promisify(client.set).bind(client);
 const delAsync = promisify(client.del).bind(client);
 const keysAsync = promisify(client.keys).bind(client);
